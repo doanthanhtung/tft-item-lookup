@@ -1,10 +1,14 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
-const { autoUpdater } = require('electron-updater');
 const { createCacheStore } = require('./cache-store');
 const { createTacticsToolsClient, stableQueryKey, SITE_BASE } = require('./tactics-tools-client');
-const { createUpdateManager } = require('./update-manager');
+const {
+  HELPER_FLAG,
+  createPortableUpdateManager,
+  runPortableUpdateHelper,
+  writeStartupMarker,
+} = require('./update-manager');
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 let mainWindow;
@@ -95,37 +99,52 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, '..', 'src', 'index.html'));
 }
 
-app.whenReady().then(() => {
-  cache = createCacheStore(path.join(app.getPath('userData'), 'cache.json'), CACHE_TTL_MS);
-  client = createTacticsToolsClient({ browserFallback });
-  const updateConfig = readUpdateConfig();
-  updateManager = createUpdateManager({
-    updater: autoUpdater,
-    isPackaged: app.isPackaged,
-    config: updateConfig,
-    onStatus: (status) => {
-      if (!mainWindow?.isDestroyed()) mainWindow.webContents.send('tft:update-status', status);
-    },
+const helperJobIndex = process.argv.indexOf(HELPER_FLAG);
+if (helperJobIndex !== -1) {
+  const helperJobPath = process.argv[helperJobIndex + 1];
+  runPortableUpdateHelper(helperJobPath)
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error('[portable-updater]', error);
+      process.exit(1);
+    });
+} else {
+  app.whenReady().then(() => {
+    cache = createCacheStore(path.join(app.getPath('userData'), 'cache.json'), CACHE_TTL_MS);
+    client = createTacticsToolsClient({ browserFallback });
+    const updateConfig = readUpdateConfig();
+    updateManager = createPortableUpdateManager({
+      app,
+      config: updateConfig,
+      currentVersion: app.getVersion(),
+      isPackaged: app.isPackaged,
+      portableExecutableFile: process.env.PORTABLE_EXECUTABLE_FILE,
+      execPath: process.execPath,
+      onInstallRequested: () => app.quit(),
+      onStatus: (status) => {
+        if (!mainWindow?.isDestroyed()) mainWindow.webContents.send('tft:update-status', status);
+      },
+    });
+    ipcMain.handle('tft:get-unit-catalog', () => withCache('catalog', () => client.getUnitCatalog()));
+    ipcMain.handle('tft:query-explorer', (_event, filters) => withCache(`query:${stableQueryKey(filters)}`, () => client.queryExplorer(filters)));
+    ipcMain.handle('tft:open-source', () => shell.openExternal(SITE_BASE));
+    ipcMain.handle('tft:open-releases', () => shell.openExternal(releaseUrlFromConfig(updateConfig)));
+    ipcMain.handle('tft:get-app-info', () => ({
+      cacheTtlMinutes: CACHE_TTL_MS / 60000,
+      source: SITE_BASE,
+      version: app.getVersion(),
+      updateConfigured: updateManager.isEnabled(),
+      distribution: updateConfig.distribution || 'installer',
+      releaseUrl: releaseUrlFromConfig(updateConfig),
+    }));
+    ipcMain.handle('tft:get-update-status', () => updateManager.getState());
+    ipcMain.handle('tft:check-for-updates', () => updateManager.checkForUpdates());
+    ipcMain.handle('tft:download-and-install-update', () => updateManager.downloadAndInstall());
+    createWindow();
+    writeStartupMarker(process.env.TFT_UPDATE_SUCCESS_MARKER, app.getVersion());
+    updateManager.start();
+    app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
-  ipcMain.handle('tft:get-unit-catalog', () => withCache('catalog', () => client.getUnitCatalog()));
-  ipcMain.handle('tft:query-explorer', (_event, filters) => withCache(`query:${stableQueryKey(filters)}`, () => client.queryExplorer(filters)));
-  ipcMain.handle('tft:open-source', () => shell.openExternal(SITE_BASE));
-  ipcMain.handle('tft:open-releases', () => shell.openExternal(releaseUrlFromConfig(updateConfig)));
-  ipcMain.handle('tft:get-app-info', () => ({
-    cacheTtlMinutes: CACHE_TTL_MS / 60000,
-    source: SITE_BASE,
-    version: app.getVersion(),
-    updateConfigured: updateManager.isEnabled(),
-    distribution: updateConfig.distribution || 'installer',
-    releaseUrl: releaseUrlFromConfig(updateConfig),
-  }));
-  ipcMain.handle('tft:get-update-status', () => updateManager.getState());
-  ipcMain.handle('tft:check-for-updates', () => updateManager.checkForUpdates());
-  ipcMain.handle('tft:download-update', () => updateManager.downloadUpdate());
-  ipcMain.handle('tft:install-update', () => updateManager.installUpdate());
-  createWindow();
-  updateManager.start();
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
-});
 
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+  app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+}

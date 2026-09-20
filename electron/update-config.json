@@ -1,9 +1,10 @@
 {
-  "enabled": false,
+  "enabled": true,
   "distribution": "portable",
   "provider": "github",
   "owner": "doanthanhtung",
   "repo": "tft-item-lookup",
   "private": false,
+  "manifestUrl": "https://github.com/doanthanhtung/tft-item-lookup/releases/latest/download/latest.json",
   "releaseUrl": "https://github.com/doanthanhtung/tft-item-lookup/releases"
 }

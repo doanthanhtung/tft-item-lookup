@@ -20,7 +20,7 @@ File được tạo trong `dist/TFT-Item-Lookup-0.1.1-portable.exe`.
 
 ## Auto-update
 
-Bản phát hành chính thức dùng GitHub Releases. Vì target `portable` là một file chạy trực tiếp, `electron-updater` không tự thay thế file đang chạy; ứng dụng hiển thị nút mở trang Releases để tải bản portable mới thủ công.
+Bản phát hành chính thức dùng GitHub Releases và updater riêng cho target `portable`. Ứng dụng tự kiểm tra sau khi khởi động; khi có bản mới, người dùng bấm `Cập nhật ngay` để tải, kiểm tra SHA-256, thay đúng file `.exe` hiện tại và tự mở lại.
 
 Để phát hành bản có auto-update, cần chuẩn bị:
 
@@ -39,9 +39,9 @@ $env:CSC_KEY_PASSWORD = "..."
 npm run package:release
 ```
 
-Workflow `.github/workflows/release.yml` đã có sẵn để tự động test, ký số và publish khi push tag phiên bản mới.
+Workflow `.github/workflows/release.yml` đã có sẵn để tự động test, ký số, tạo `latest.json` và publish khi push tag phiên bản mới.
 
-Repository release hiện tại là [doanthanhtung/tft-item-lookup](https://github.com/doanthanhtung/tft-item-lookup). Certificate đang dùng là certificate cá nhân tự ký, phù hợp app cá nhân trên máy này. Nó giúp xác thực integrity và auto-update, nhưng không tạo được uy tín SmartScreen như certificate thương mại. Khi phát hành cho nhiều máy, thay `CSC_LINK` bằng certificate Authenticode từ nhà cung cấp được Windows tin cậy.
+Repository release hiện tại là [doanthanhtung/tft-item-lookup](https://github.com/doanthanhtung/tft-item-lookup). Bản `v0.1.1` là bản portable thủ công; `v0.1.2` là bản đầu tiên có updater portable tự động. Certificate đang dùng là certificate cá nhân tự ký, phù hợp app cá nhân trên máy này. Nó không tạo được uy tín SmartScreen như certificate thương mại. Khi phát hành cho nhiều máy, thay `CSC_LINK` bằng certificate Authenticode từ nhà cung cấp được Windows tin cậy.
 
 ## Nguồn dữ liệu và giới hạn
 

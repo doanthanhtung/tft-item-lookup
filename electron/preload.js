@@ -8,8 +8,7 @@ contextBridge.exposeInMainWorld('tftApi', {
   getAppInfo: () => ipcRenderer.invoke('tft:get-app-info'),
   getUpdateStatus: () => ipcRenderer.invoke('tft:get-update-status'),
   checkForUpdates: () => ipcRenderer.invoke('tft:check-for-updates'),
-  downloadUpdate: () => ipcRenderer.invoke('tft:download-update'),
-  installUpdate: () => ipcRenderer.invoke('tft:install-update'),
+  downloadAndInstallUpdate: () => ipcRenderer.invoke('tft:download-and-install-update'),
   onUpdateStatus: (callback) => {
     const listener = (_event, status) => callback(status);
     ipcRenderer.on('tft:update-status', listener);

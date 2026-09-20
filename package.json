@@ -1,6 +1,6 @@
 {
   "name": "tft-item-lookup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tra cứu thống kê trang bị TFT từ tactics.tools",
   "main": "electron/main.js",
   "private": true,
@@ -13,7 +13,6 @@
     "package:release": "node scripts/build-release.js"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9",
     "vue": "^3.5.13"
   },
   "devDependencies": {

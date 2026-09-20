@@ -17,7 +17,7 @@ createApp({
     const error = ref(null);
     const sort = reactive({ key: 'avgPlace', direction: 'asc' });
     const activeTab = ref('trios');
-    const appInfo = ref({ cacheTtlMinutes: 15, updateConfigured: false, version: '' });
+    const appInfo = ref({ cacheTtlMinutes: 15, updateConfigured: false, distribution: 'installer', version: '' });
     const updateStatus = ref({ status: 'disabled', progress: 0 });
     let removeUpdateListener = () => {};
     const theme = ref(localStorage.getItem('tft-theme') || 'dark');
@@ -37,7 +37,8 @@ createApp({
       if (status === 'not-available') return 'Đang dùng bản mới nhất';
       if (status === 'available') return `Có bản ${updateStatus.value.availableVersion || 'mới'}`;
       if (status === 'downloading') return `Đang tải ${Math.round(updateStatus.value.progress || 0)}%`;
-      if (status === 'downloaded') return 'Sẵn sàng cài đặt';
+      if (status === 'verifying') return 'Đang xác minh bản tải xuống...';
+      if (status === 'installing') return 'Đang khởi động lại để cập nhật...';
       if (status === 'error') return 'Cập nhật không thành công';
       return '';
     });
@@ -110,8 +111,7 @@ createApp({
       finally { loading.value = false; }
     }
     async function checkForUpdates() { updateStatus.value = await window.tftApi.checkForUpdates(); }
-    async function downloadUpdate() { updateStatus.value = await window.tftApi.downloadUpdate(); }
-    function installUpdate() { window.tftApi.installUpdate(); }
+    async function downloadAndInstallUpdate() { updateStatus.value = await window.tftApi.downloadAndInstallUpdate(); }
     onMounted(async () => {
       appInfo.value = await window.tftApi.getAppInfo();
       updateStatus.value = await window.tftApi.getUpdateStatus();
@@ -123,14 +123,14 @@ createApp({
       catalog, selectedUnit, unitSearch, filters, result, loading, loadingCatalog, error, sort, activeTab,
       selectedName, rows, formatNumber, formatGames, formatPercent, formatDelta, formatDate, itemLabel,
       toggleSort, sortMark, errorText, query, appInfo, openSource, selectUnitFromSearch, toggleTheme,
-      hasPendingChanges, theme, updateStatus, updateLabel, checkForUpdates, downloadUpdate, installUpdate, openReleases,
+      hasPendingChanges, theme, updateStatus, updateLabel, checkForUpdates, downloadAndInstallUpdate, openReleases,
     };
   },
   template: `
     <main class="shell" :data-theme="theme" :aria-busy="loading || loadingCatalog">
       <header class="topbar">
         <div><p class="eyebrow">PERSONAL DESKTOP TOOL</p><h1>TFT Item Lookup</h1><p class="subtitle">Tra cứu cách lên đồ dựa trên thống kê trận đấu từ tactics.tools.</p></div>
-        <div class="topbar-actions"><span v-if="appInfo.distribution === 'portable'" class="update-note">Portable · cập nhật thủ công</span><span v-else-if="appInfo.updateConfigured" class="update-note" :class="updateStatus.status">{{ updateLabel }}</span><button v-if="appInfo.distribution === 'portable'" class="theme-button" @click="openReleases">Tải bản mới ↗</button><button v-if="appInfo.updateConfigured && ['idle', 'not-available', 'error'].includes(updateStatus.status)" class="theme-button" @click="checkForUpdates">Kiểm tra cập nhật</button><button v-if="appInfo.updateConfigured && updateStatus.status === 'available'" class="theme-button" @click="downloadUpdate">Tải bản mới</button><button v-if="appInfo.updateConfigured && updateStatus.status === 'downloaded'" class="primary-button update-button" @click="installUpdate">Khởi động lại để cập nhật</button><button class="theme-button" :aria-label="theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'" @click="toggleTheme">{{ theme === 'dark' ? 'Sáng' : 'Tối' }}</button><button class="ghost-button" @click="openSource">Mở tactics.tools ↗</button></div>
+        <div class="topbar-actions"><span v-if="appInfo.updateConfigured" class="update-note" :class="updateStatus.status">{{ updateLabel }}</span><button v-if="appInfo.updateConfigured && ['idle', 'not-available', 'error'].includes(updateStatus.status)" class="theme-button" @click="checkForUpdates">Kiểm tra cập nhật</button><button v-if="appInfo.updateConfigured && updateStatus.status === 'available'" class="primary-button update-button" @click="downloadAndInstallUpdate">Cập nhật ngay</button><button v-if="appInfo.updateConfigured && updateStatus.status === 'available'" class="theme-button" @click="openReleases">Xem release ↗</button><button class="theme-button" :aria-label="theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'" @click="toggleTheme">{{ theme === 'dark' ? 'Sáng' : 'Tối' }}</button><button class="ghost-button" @click="openSource">Mở tactics.tools ↗</button></div>
       </header>
       <section class="panel controls">
         <div class="section-heading"><div><span class="step">01</span><h2>Chọn tướng và bộ lọc</h2></div><span class="muted">Chỉ gửi request khi bấm Tra cứu · cache {{ appInfo.cacheTtlMinutes }} phút</span></div>
