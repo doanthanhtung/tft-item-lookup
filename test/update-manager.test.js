@@ -106,7 +106,7 @@ test('manager checks latest manifest and transitions to available', async () => 
   assert.deepEqual(statuses, ['checking', 'available']);
 });
 
-test('manager reports no update and HTTP errors without throwing', async () => {
+test('manager reports no update and common HTTP errors without throwing', async () => {
   const latest = createPortableUpdateManager({
     config,
     currentVersion: '0.1.2',
@@ -117,17 +117,48 @@ test('manager reports no update and HTTP errors without throwing', async () => {
   });
   assert.equal((await latest.checkForUpdates()).status, 'not-available');
 
-  const failed = createPortableUpdateManager({
+  for (const statusCode of [403, 404, 429, 500, 503]) {
+    const failed = createPortableUpdateManager({
+      config,
+      currentVersion: '0.1.1',
+      isPackaged: true,
+      platform: 'win32',
+      portableExecutableFile: 'C:\Apps\TFT-Item-Lookup.exe',
+      fetchImpl: async () => responseFrom({}, statusCode),
+    });
+    const state = await failed.checkForUpdates();
+    assert.equal(state.status, 'error');
+    assert.match(state.error, new RegExp('HTTP ' + statusCode));
+  }
+});
+
+test('manager rejects malformed JSON and a downloaded hash mismatch', async () => {
+  const malformed = createPortableUpdateManager({
     config,
     currentVersion: '0.1.1',
     isPackaged: true,
     platform: 'win32',
     portableExecutableFile: 'C:\Apps\TFT-Item-Lookup.exe',
-    fetchImpl: async () => responseFrom({}, 503),
+    fetchImpl: async () => ({ ok: true, status: 200, json: async () => { throw new Error('Unexpected token'); } }),
   });
-  const state = await failed.checkForUpdates();
+  assert.equal((await malformed.checkForUpdates()).status, 'error');
+
+  const badManifest = { ...manifest(), sha256: '0'.repeat(64) };
+  let spawned = false;
+  const mismatch = createPortableUpdateManager({
+    app: { getPath: () => os.tmpdir() },
+    config,
+    currentVersion: '0.1.1',
+    isPackaged: true,
+    platform: 'win32',
+    portableExecutableFile: 'C:\Apps\TFT-Item-Lookup.exe',
+    fetchImpl: async (url) => url.endsWith('latest.json') ? responseFrom(badManifest) : responseFrom('portable-update'),
+    spawnImpl: () => { spawned = true; return { unref() {} }; },
+  });
+  await mismatch.checkForUpdates();
+  const state = await mismatch.downloadAndInstall();
   assert.equal(state.status, 'error');
-  assert.match(state.error, /HTTP 503/);
+  assert.equal(spawned, false);
 });
 
 test('portable updater stays disabled in development or without executable path', () => {
@@ -172,7 +203,9 @@ test('downloads, verifies and schedules a portable installation', async () => {
 
 test('helper atomically replaces the executable and cleans temporary files', async () => {
   const directory = await fsp.mkdtemp(path.join(os.tmpdir(), 'tft-update-helper-'));
-  const targetPath = path.join(directory, 'TFT-Item-Lookup.exe');
+  const appDirectory = path.join(directory, 'Thư mục app có dấu cách');
+  await fsp.mkdir(appDirectory);
+  const targetPath = path.join(appDirectory, 'TFT-Item-Lookup.exe');
   const stagedPath = path.join(directory, 'download.exe');
   const jobPath = path.join(directory, 'job.json');
   const markerPath = path.join(directory, 'started.json');

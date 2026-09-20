@@ -16,7 +16,7 @@ Tạo một file portable Windows, chạy trực tiếp không cần cài đặt
 npm run package:win
 ```
 
-File được tạo trong `dist/TFT-Item-Lookup-0.1.1-portable.exe`.
+File được tạo trong `dist/TFT-Item-Lookup-0.1.2-portable.exe` (version thực tế sẽ theo package.json).
 
 ## Auto-update
 
