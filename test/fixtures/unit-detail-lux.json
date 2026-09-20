@@ -1,0 +1,16 @@
+{
+  "unitId": "da_18_lux_inferno",
+  "starLevel": 2,
+  "unitData": {
+    "base": { "count": 1000, "rate": 1.2, "place": 3.4, "top4": 68.06, "won": 31.24 },
+    "items": [
+      { "items": "DA_SpearOfShojin", "count": 250, "place": 3.2, "top4": 70, "won": 30, "adjDelta": -0.1 }
+    ],
+    "itemPairs": [
+      { "items": ["DA_SpearOfShojin", "DA_JeweledGauntlet"], "count": 100, "place": 3.1, "top4": 72, "won": 35, "adjDelta": -0.2 }
+    ],
+    "itemTrios": [
+      { "items": ["DA_SpearOfShojin", "DA_JeweledGauntlet", "DA_StrikersFlail"], "count": 50, "place": 2.9, "top4": 76, "won": 38, "adjDelta": -0.3 }
+    ]
+  }
+}

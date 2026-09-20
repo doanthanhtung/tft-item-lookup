@@ -1,0 +1,30 @@
+name: Windows release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm run package:release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          TFT_GITHUB_OWNER: ${{ vars.TFT_GITHUB_OWNER }}
+          TFT_GITHUB_REPO: ${{ vars.TFT_GITHUB_REPO }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
