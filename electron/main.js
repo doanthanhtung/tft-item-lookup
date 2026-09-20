@@ -20,6 +20,13 @@ function readUpdateConfig() {
   }
 }
 
+function releaseUrlFromConfig(config) {
+  const url = typeof config.releaseUrl === 'string' ? config.releaseUrl : '';
+  return /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/releases\/?$/i.test(url)
+    ? url
+    : 'https://github.com/doanthanhtung/tft-item-lookup/releases';
+}
+
 function browserFallback(url) {
   if (!url.startsWith(`${SITE_BASE}/`)) throw new Error('URL fallback không hợp lệ.');
   return new Promise((resolve, reject) => {
@@ -103,11 +110,14 @@ app.whenReady().then(() => {
   ipcMain.handle('tft:get-unit-catalog', () => withCache('catalog', () => client.getUnitCatalog()));
   ipcMain.handle('tft:query-explorer', (_event, filters) => withCache(`query:${stableQueryKey(filters)}`, () => client.queryExplorer(filters)));
   ipcMain.handle('tft:open-source', () => shell.openExternal(SITE_BASE));
+  ipcMain.handle('tft:open-releases', () => shell.openExternal(releaseUrlFromConfig(updateConfig)));
   ipcMain.handle('tft:get-app-info', () => ({
     cacheTtlMinutes: CACHE_TTL_MS / 60000,
     source: SITE_BASE,
     version: app.getVersion(),
     updateConfigured: updateManager.isEnabled(),
+    distribution: updateConfig.distribution || 'installer',
+    releaseUrl: releaseUrlFromConfig(updateConfig),
   }));
   ipcMain.handle('tft:get-update-status', () => updateManager.getState());
   ipcMain.handle('tft:check-for-updates', () => updateManager.checkForUpdates());

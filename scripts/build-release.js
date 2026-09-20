@@ -20,17 +20,19 @@ if (publishMode === 'always' && !process.env.GH_TOKEN) fail('Thiếu GH_TOKEN đ
 
 const previous = fs.readFileSync(configPath, 'utf8');
 const updateConfig = {
-  enabled: true,
+  enabled: false,
+  distribution: 'portable',
   provider: 'github',
   owner,
   repo,
   private: process.env.TFT_GITHUB_PRIVATE === '1',
+  releaseUrl: 'https://github.com/' + owner + '/' + repo + '/releases',
 };
 fs.writeFileSync(configPath, `${JSON.stringify(updateConfig, null, 2)}\n`, 'utf8');
 
 try {
   const cliPath = require.resolve('electron-builder/cli');
-  const args = [cliPath, '--win', 'nsis', '--publish', publishMode, '-c.publish.provider=github', `-c.publish.owner=${owner}`, `-c.publish.repo=${repo}`];
+  const args = [cliPath, '--win', 'portable', '--publish', publishMode, '-c.publish.provider=github', `-c.publish.owner=${owner}`, `-c.publish.repo=${repo}`];
   if (updateConfig.private) args.push('-c.publish.private=true');
   const result = spawnSync(process.execPath, args, { stdio: 'inherit', env: process.env });
   process.exitCode = result.status ?? 1;

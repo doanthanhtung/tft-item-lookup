@@ -10,17 +10,17 @@ npm test
 npm start
 ```
 
-Tạo installer Windows không cần quyền administrator:
+Tạo một file portable Windows, chạy trực tiếp không cần cài đặt hay quyền administrator:
 
 ```powershell
 npm run package:win
 ```
 
-File cài đặt được tạo trong `dist/TFT Item Lookup Setup 0.1.0.exe`.
+File được tạo trong `dist/TFT-Item-Lookup-0.1.1-portable.exe`.
 
 ## Auto-update
 
-Bản phát hành chính thức dùng `electron-updater` với GitHub Releases. Bản build thường (`npm run package:win`) không bật update để không trỏ nhầm vào repository chưa cấu hình.
+Bản phát hành chính thức dùng GitHub Releases. Vì target `portable` là một file chạy trực tiếp, `electron-updater` không tự thay thế file đang chạy; ứng dụng hiển thị nút mở trang Releases để tải bản portable mới thủ công.
 
 Để phát hành bản có auto-update, cần chuẩn bị:
 
@@ -39,7 +39,7 @@ $env:CSC_KEY_PASSWORD = "..."
 npm run package:release
 ```
 
-Workflow `.github/workflows/release.yml` đã có sẵn để tự động test, ký số và publish khi push tag dạng `v0.1.1`.
+Workflow `.github/workflows/release.yml` đã có sẵn để tự động test, ký số và publish khi push tag phiên bản mới.
 
 Repository release hiện tại là [doanthanhtung/tft-item-lookup](https://github.com/doanthanhtung/tft-item-lookup). Certificate đang dùng là certificate cá nhân tự ký, phù hợp app cá nhân trên máy này. Nó giúp xác thực integrity và auto-update, nhưng không tạo được uy tín SmartScreen như certificate thương mại. Khi phát hành cho nhiều máy, thay `CSC_LINK` bằng certificate Authenticode từ nhà cung cấp được Windows tin cậy.
 

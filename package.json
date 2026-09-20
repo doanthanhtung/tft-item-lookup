@@ -1,6 +1,6 @@
 {
   "name": "tft-item-lookup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tra cứu thống kê trang bị TFT từ tactics.tools",
   "main": "electron/main.js",
   "private": true,
@@ -8,7 +8,7 @@
     "start": "electron .",
     "test": "node --test test/*.test.js",
     "check": "node --check electron/main.js && node --check electron/preload.js && node --check electron/cache-store.js && node --check electron/tactics-tools-client.js && node --check electron/update-manager.js && node --check scripts/build-release.js && node --check src/app.js",
-    "package:win": "electron-builder --win nsis",
+    "package:win": "electron-builder --win portable",
     "package:dir": "electron-builder --dir --win",
     "package:release": "node scripts/build-release.js"
   },
@@ -23,7 +23,7 @@
   "build": {
     "appId": "com.personal.tft-item-lookup",
     "productName": "TFT Item Lookup",
-    "artifactName": "TFT-Item-Lookup-Setup-${version}.${ext}",
+    "artifactName": "TFT-Item-Lookup-${version}-portable.${ext}",
     "files": [
       "electron/**/*",
       "src/**/*",
@@ -31,12 +31,7 @@
       "node_modules/vue/dist/vue.global.prod.js"
     ],
     "win": {
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "target": "portable"
     }
   }
 }

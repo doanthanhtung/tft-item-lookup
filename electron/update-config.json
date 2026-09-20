@@ -1,7 +1,9 @@
 {
-  "enabled": true,
+  "enabled": false,
+  "distribution": "portable",
   "provider": "github",
   "owner": "doanthanhtung",
   "repo": "tft-item-lookup",
-  "private": false
+  "private": false,
+  "releaseUrl": "https://github.com/doanthanhtung/tft-item-lookup/releases"
 }

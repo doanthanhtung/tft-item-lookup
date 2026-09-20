@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('tftApi', {
   getUnitCatalog: () => ipcRenderer.invoke('tft:get-unit-catalog'),
   queryExplorer: (filters) => ipcRenderer.invoke('tft:query-explorer', filters),
   openSource: () => ipcRenderer.invoke('tft:open-source'),
+  openReleases: () => ipcRenderer.invoke('tft:open-releases'),
   getAppInfo: () => ipcRenderer.invoke('tft:get-app-info'),
   getUpdateStatus: () => ipcRenderer.invoke('tft:get-update-status'),
   checkForUpdates: () => ipcRenderer.invoke('tft:check-for-updates'),

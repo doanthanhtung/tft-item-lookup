@@ -25,6 +25,19 @@ test('keeps updater disabled in development builds', async () => {
   assert.equal(updater.feedConfig, undefined);
 });
 
+test('keeps electron-updater disabled for portable distributions', () => {
+  const updater = new FakeUpdater();
+  const manager = createUpdateManager({
+    updater,
+    isPackaged: true,
+    platform: 'win32',
+    config: { enabled: true, distribution: 'portable', provider: 'github', owner: 'doant', repo: 'tft-item-lookup' },
+  });
+  assert.equal(manager.isEnabled(), false);
+  assert.equal(manager.getState().status, 'disabled');
+  assert.equal(updater.feedConfig, undefined);
+});
+
 test('checks, downloads and installs an enabled update', async () => {
   const updater = new FakeUpdater();
   const statuses = [];

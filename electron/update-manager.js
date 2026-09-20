@@ -17,7 +17,7 @@ function getFeedConfig(config = {}) {
 
 function createUpdateManager({ updater, isPackaged = false, platform = process.platform, config = {}, onStatus = () => {}, logger = console } = {}) {
   const feedConfig = getFeedConfig(config);
-  const enabled = Boolean(updater && isPackaged && platform === 'win32' && config.enabled && feedConfig);
+  const enabled = Boolean(updater && isPackaged && platform === 'win32' && config.distribution !== 'portable' && config.enabled && feedConfig);
   let state = {
     configured: enabled,
     status: enabled ? 'idle' : 'disabled',
