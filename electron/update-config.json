@@ -1,7 +1,7 @@
 {
-  "enabled": false,
+  "enabled": true,
   "provider": "github",
-  "owner": "",
-  "repo": "",
+  "owner": "doanthanhtung",
+  "repo": "tft-item-lookup",
   "private": false
 }

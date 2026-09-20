@@ -23,6 +23,7 @@
   "build": {
     "appId": "com.personal.tft-item-lookup",
     "productName": "TFT Item Lookup",
+    "artifactName": "TFT-Item-Lookup-Setup-${version}.${ext}",
     "files": [
       "electron/**/*",
       "src/**/*",

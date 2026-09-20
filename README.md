@@ -41,6 +41,8 @@ npm run package:release
 
 Workflow `.github/workflows/release.yml` đã có sẵn để tự động test, ký số và publish khi push tag dạng `v0.1.1`.
 
+Repository release hiện tại là [doanthanhtung/tft-item-lookup](https://github.com/doanthanhtung/tft-item-lookup). Certificate đang dùng là certificate cá nhân tự ký, phù hợp app cá nhân trên máy này. Nó giúp xác thực integrity và auto-update, nhưng không tạo được uy tín SmartScreen như certificate thương mại. Khi phát hành cho nhiều máy, thay `CSC_LINK` bằng certificate Authenticode từ nhà cung cấp được Windows tin cậy.
+
 ## Nguồn dữ liệu và giới hạn
 
 - Adapter dùng danh sách tướng và trang chi tiết công khai của `tactics.tools`.

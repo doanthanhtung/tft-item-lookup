@@ -23,7 +23,7 @@ jobs:
       - run: npm run check
       - run: npm run package:release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TFT_GITHUB_OWNER: ${{ vars.TFT_GITHUB_OWNER }}
           TFT_GITHUB_REPO: ${{ vars.TFT_GITHUB_REPO }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
